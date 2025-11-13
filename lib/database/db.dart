@@ -1,10 +1,12 @@
+import 'package:injectable/injectable.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
-class SQFlite {
-  SQFlite._();
+@singleton
+class DB {
+  DB._();
 
-  static final SQFlite instance = SQFlite._();
+  static final DB instance = DB._();
 
   static Database? _database;
 
