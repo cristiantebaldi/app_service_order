@@ -1,8 +1,6 @@
-import 'package:injectable/injectable.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
-@singleton
 class DB {
   DB._();
 
