@@ -15,14 +15,14 @@ class ChangeServiceOrderRepositoryImpl implements ChangeServiceOrderRepository {
       db = await DB.instance.database;
       return await db.transaction((txn) async {
         await txn.update('service_order', {
-          'reponsible': serviceOrder.responsible,
+          'responsible': serviceOrder.responsible,
           'task': serviceOrder.task,
           'status': serviceOrder.status,
           'active': serviceOrder.active,
           'excluded': serviceOrder.excluded,
-          'start_prevision': serviceOrder.startPrevison,
-          'end_prevision': serviceOrder.endPrevison,
-          'updated_date': DateTime.now().microsecondsSinceEpoch
+          'start_prevision': serviceOrder.startPrevison.millisecondsSinceEpoch,
+          'end_prevision': serviceOrder.endPrevison.millisecondsSinceEpoch,
+          'updated_date': DateTime.now().millisecondsSinceEpoch
         }, where: 'id = ?', whereArgs: [id]);
         return serviceOrder;
       });

@@ -13,9 +13,7 @@ class FetchServiceOrderRepositoryImpl implements FetchServiceOrderRepository {
   @override
   Future<List<ServiceOrder>> call() async {
     db = await DB.instance.database;
-    List<ServiceOrder> serviceOrders;
-    serviceOrders = (await db.query('service_order')).cast<ServiceOrder>();
-
-    return serviceOrders;
+    final rows = await db.query('service_order');
+    return rows.map<ServiceOrder>((r) => ServiceOrder.fromMap(r)).toList();
   }
 }

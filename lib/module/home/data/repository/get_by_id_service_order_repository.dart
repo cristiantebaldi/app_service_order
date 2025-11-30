@@ -14,7 +14,8 @@ class GetByIDServiceOrderRepositoryImpl implements GetByIDServiceOrderRepository
   @override
   Future<ServiceOrder> call(int id) async {
     db = await DB.instance.database;
-    ServiceOrder serviceOrder = (await db.query('service_order', where: 'id = ?',whereArgs: [id])).cast<ServiceOrder>() as ServiceOrder;
-    return serviceOrder;
+    final rows = await db.query('service_order', where: 'id = ?', whereArgs: [id]);
+    if (rows.isEmpty) throw Exception('Registro não encontrado');
+    return ServiceOrder.fromMap(rows.first);
   }
 }

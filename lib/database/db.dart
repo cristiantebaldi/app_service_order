@@ -24,19 +24,34 @@ class DB {
   _onCreate(db, versao) async {
     await db.execute(_serviceOrder);
   }
-
   String get _serviceOrder => '''
   CREATE TABLE service_order (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     responsible TEXT,
     task TEXT,
     status TEXT,
-    active BOOL,
-    excluded BOOL,
+    active INT,
+    excluded INT,
     start_prevision INT,
     end_prevision INT,
     created_date INT,
     updated_date INT
+  );
+  ''';
+
+  String get _image => '''
+  CREATE TABLE image (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    path TEXT,
+    created_date INT
+  );
+  ''';
+
+  String get _serviceOrderImage => '''
+  CREATE TABLE service_order_image (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    service_order_id INT,
+    image_id INT
   );
   ''';
 }

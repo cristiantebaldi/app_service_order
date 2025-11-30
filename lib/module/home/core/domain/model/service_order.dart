@@ -1,17 +1,17 @@
 class ServiceOrder {
-  int id;
+  int ?id;
   String responsible;
   String task;
   String status;
-  bool active;
-  bool excluded;
+  int active;
+  int excluded;
   DateTime startPrevison;
   DateTime endPrevison;
-  DateTime createdDate;
+  DateTime ?createdDate;
   DateTime updatedDate;
 
   ServiceOrder({
-    required this.id,
+    this.id,
     required this.responsible,
     required this.task,
     required this.status,
@@ -19,7 +19,30 @@ class ServiceOrder {
     required this.excluded,
     required this.startPrevison,
     required this.endPrevison,
-    required this.createdDate,
+    this.createdDate,
     required this.updatedDate,
   });
+
+  factory ServiceOrder.fromMap(Map<String, dynamic> m) {
+    parseInt(dynamic v) => v is int ? v : int.tryParse('$v');
+    DateTime? parseDate(dynamic v) {
+      if (v == null) return null;
+      final int value = v is int ? v : int.tryParse('$v') ?? 0;
+      if (value == 0) return null;
+      return DateTime.fromMillisecondsSinceEpoch(value);
+    }
+
+    return ServiceOrder(
+      id: parseInt(m['id']),
+      responsible: (m['responsible'] ?? '') as String,
+      task: (m['task'] ?? '') as String,
+      status: (m['status'] ?? '') as String,
+      active: m['active'],
+      excluded: m['excluded'],
+      startPrevison: parseDate(m['start_prevision']) ?? DateTime.now(),
+      endPrevison: parseDate(m['end_prevision']) ?? DateTime.now(),
+      createdDate: parseDate(m['created_date']),
+      updatedDate: parseDate(m['updated_date']) ?? DateTime.now(),
+    );
+  }
 }

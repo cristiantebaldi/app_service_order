@@ -84,12 +84,6 @@ extension GetItInjectableX on _i174.GetIt {
         fetchServiceOrderRepository: gh<_i1007.FetchServiceOrderRepository>(),
       ),
     );
-    gh.factory<_i159.HomeController>(
-      () => _i159.HomeController(
-        fetchServiceOrderUsecase: gh<_i714.FetchServiceOrderUsecase>(),
-        createServiceOrderUsecase: gh<_i56.CreateServiceOrderUsecase>(),
-      ),
-    );
     gh.factory<_i902.DeleteServiceOrderUsecase>(
       () => _i902.DeleteServiceOrderUsecase(
         deleteServiceOrderRepository: gh<_i138.DeleteServiceOrderRepository>(),
@@ -104,6 +98,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i1007.ChangeServiceOrderUsecase>(
       () => _i1007.ChangeServiceOrderUsecase(
         changeServiceOrderRepository: gh<_i783.ChangeServiceOrderRepository>(),
+      ),
+    );
+    gh.factory<_i159.HomeController>(
+      () => _i159.HomeController(
+        fetchServiceOrderUsecase: gh<_i714.FetchServiceOrderUsecase>(),
+        createServiceOrderUsecase: gh<_i56.CreateServiceOrderUsecase>(),
+        changeServiceOrderUsecase: gh<_i1007.ChangeServiceOrderUsecase>(),
+        deleteServiceOrderUsecase: gh<_i902.DeleteServiceOrderUsecase>(),
       ),
     );
     return this;
