@@ -2,6 +2,7 @@ class ServiceOrder {
   int ?id;
   String responsible;
   String task;
+  String description;
   String status;
   int active;
   int excluded;
@@ -14,6 +15,7 @@ class ServiceOrder {
     this.id,
     required this.responsible,
     required this.task,
+    required this.description,
     required this.status,
     required this.active,
     required this.excluded,
@@ -36,6 +38,7 @@ class ServiceOrder {
       id: parseInt(m['id']),
       responsible: (m['responsible'] ?? '') as String,
       task: (m['task'] ?? '') as String,
+      description: (m['description'] ?? '') as String,
       status: (m['status'] ?? '') as String,
       active: m['active'],
       excluded: m['excluded'],

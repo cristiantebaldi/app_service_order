@@ -16,6 +16,7 @@ class HomeController extends Cubit<HomeState> {
 
   StatusFilter _currentFilter = StatusFilter.ativos;
   List<ServiceOrder> _all = const [];
+  List<ServiceOrder> get all => List.unmodifiable(_all);
 
   HomeController({
     required this.fetchServiceOrderUsecase,

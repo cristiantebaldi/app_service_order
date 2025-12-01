@@ -16,19 +16,46 @@ class DB {
   _initDatabase() async {
     return await openDatabase (
       join(await getDatabasesPath(), 'service_order.db'),
-      version: 1,
+      version: 2,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
   _onCreate(db, versao) async {
     await db.execute(_serviceOrder);
+    await db.execute(_image);
+    await db.execute(_serviceOrderImage);
   }
+
+  _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('''
+      CREATE TABLE IF NOT EXISTS image (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        path TEXT,
+        created_date INT
+      );
+      ''');
+      await db.execute('''
+      CREATE TABLE IF NOT EXISTS service_order_image (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        service_order_id INT,
+        image_id INT
+      );
+      ''');
+      await db.execute('''
+      ALTER TABLE service_order ADD COLUMN description TEXT;
+      ''');
+    }
+  }
+
   String get _serviceOrder => '''
   CREATE TABLE service_order (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     responsible TEXT,
     task TEXT,
+    description TEXT,
     status TEXT,
     active INT,
     excluded INT,

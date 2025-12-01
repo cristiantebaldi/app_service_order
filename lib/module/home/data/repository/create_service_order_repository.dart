@@ -17,6 +17,7 @@ class CreateServiceOrderRepositoryImpl implements CreateServiceOrderRepository {
       await txn.insert('service_order', {
         'responsible': serviceOrder.responsible,
         'task': serviceOrder.task,
+        'description': serviceOrder.description,
         'status': serviceOrder.status,
         'active': serviceOrder.active,
         'excluded': serviceOrder.excluded,

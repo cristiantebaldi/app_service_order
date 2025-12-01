@@ -1,4 +1,3 @@
-import 'package:app_service_order/di/injection.dart';
 import 'package:app_service_order/module/home/controller/home_controller.dart';
 import 'package:app_service_order/module/home/core/domain/model/service_order.dart';
 import 'package:app_service_order/module/home/state/home_state.dart';
@@ -7,8 +6,6 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HomeView extends StatelessWidget {
-  final controller = getIt<HomeController>();
-
   HomeView({super.key});
 
   void _showCreateServiceOrderForm(BuildContext context) {
@@ -16,10 +13,13 @@ class HomeView extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _CreateServiceOrderDialog(
-        onSave: (serviceOrder) {
-          controller.saveServiceOrder(serviceOrder);
-        },
+      builder: (ctx) => BlocProvider.value(
+        value: context.read<HomeController>(),
+        child: _CreateServiceOrderDialog(
+          onSave: (serviceOrder) {
+            context.read<HomeController>().saveServiceOrder(serviceOrder);
+          },
+        ),
       ),
     );
   }
@@ -29,110 +29,126 @@ class HomeView extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _EditServiceOrderDialog(
-        serviceOrder: serviceOrder,
-        onSave: (updatedOrder) {
-          controller.updateServiceOrder(serviceOrder.id!, updatedOrder);
-        },
+      builder: (ctx) => BlocProvider.value(
+        value: context.read<HomeController>(),
+        child: _EditServiceOrderDialog(
+          serviceOrder: serviceOrder,
+          onSave: (updatedOrder) {
+            context.read<HomeController>().updateServiceOrder(serviceOrder.id!, updatedOrder);
+          },
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => controller,
-      child: BlocBuilder<HomeController, HomeState>(
-        builder: (context, state) {
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text('Ordens de Serviço'),
-            ),
-            body: Builder(
-              builder: (context) {
-                if (state is HomeLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (state is HomeError) {
-                  return Center(child: Text('Erro: ${state.message}'));
-                } else if (state is HomeLoaded) {
-                  final loaded = state as HomeLoaded;
-                  return Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                        child: SegmentedButton<StatusFilter>(
-                          segments: const [
-                            ButtonSegment(value: StatusFilter.ativos, label: Text('Ativos'), icon: Icon(Icons.check_circle_outline)),
-                            ButtonSegment(value: StatusFilter.emAndamento, label: Text('Em andamento'), icon: Icon(Icons.timelapse)),
-                            ButtonSegment(value: StatusFilter.finalizados, label: Text('Finalizados'), icon: Icon(Icons.done_all)),
-                          ],
-                          selected: {loaded.filter},
-                          onSelectionChanged: (s) {
-                            if (s.isNotEmpty) {
-                              context.read<HomeController>().setFilter(s.first);
-                            }
-                          },
-                        ),
+    return BlocBuilder<HomeController, HomeState>(
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Ordens de Serviço'),
+          ),
+          body: Builder(
+            builder: (context) {
+              if (state is HomeLoading) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (state is HomeError) {
+                return Center(child: Text('Erro: ${state.message}'));
+              } else if (state is HomeLoaded) {
+                final loaded = state as HomeLoaded;
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                      child: SegmentedButton<StatusFilter>(
+                        segments: const [
+                          ButtonSegment(value: StatusFilter.ativos, label: Text('Ativos'), icon: Icon(Icons.check_circle_outline)),
+                          ButtonSegment(value: StatusFilter.emAndamento, label: Text('Em andamento'), icon: Icon(Icons.timelapse)),
+                          ButtonSegment(value: StatusFilter.finalizados, label: Text('Finalizados'), icon: Icon(Icons.done_all)),
+                        ],
+                        selected: {loaded.filter},
+                        onSelectionChanged: (s) {
+                          if (s.isNotEmpty) {
+                            context.read<HomeController>().setFilter(s.first);
+                          }
+                        },
                       ),
-                      Expanded(
-                        child: loaded.serviceOrders.isEmpty
-                            ? const Center(
-                                child: Padding(
-                                  padding: EdgeInsets.all(24.0),
-                                  child: Text('Nenhuma ordem de serviço para este filtro'),
-                                ),
-                              )
-                            : ListView.builder(
-                                padding: const EdgeInsets.all(16),
-                                itemBuilder: (context, index) {
-                                  final order = loaded.serviceOrders[index];
-                                  return Slidable(
-                                    key: ValueKey(order.id),
-                                    endActionPane: ActionPane(
-                                      motion: const DrawerMotion(),
-                                      extentRatio: 0.42,
-                                      children: [
-                                        SlidableAction(
-                                          onPressed: (_) => _showEditServiceOrderForm(context, order),
-                                          backgroundColor: Colors.blue,
-                                          foregroundColor: Colors.white,
-                                          icon: Icons.edit,
-                                          label: 'Editar',
-                                        ),
-                                        SlidableAction(
-                                          onPressed: (_) => context.read<HomeController>().deleteServiceOrder(order.id!),
-                                          backgroundColor: Colors.red,
-                                          foregroundColor: Colors.white,
-                                          icon: Icons.delete,
-                                          label: 'Excluir',
-                                        ),
-                                      ],
-                                    ),
-                                    child: GestureDetector(
-                                      onTap: () => _showEditServiceOrderForm(context, order),
-                                      child: _ServiceOrderCard(serviceOrder: order),
-                                    ),
-                                  );
-                                },
-                                itemCount: loaded.serviceOrders.length,
+                    ),
+                    Expanded(
+                      child: loaded.serviceOrders.isEmpty
+                          ? const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(24.0),
+                                child: Text('Nenhuma ordem de serviço para este filtro'),
                               ),
-                      ),
-                    ],
-                  );
-                }
-                return const Center(child: Text('Estado inicial'));
-              },
-            ),
-            floatingActionButton: FloatingActionButton(
-              onPressed: () => _showCreateServiceOrderForm(context),
-              child: const Icon(Icons.add),
-            ),
-          );
-        },
-      ),
+                            )
+                          : ListView.builder(
+                              padding: const EdgeInsets.all(16),
+                              itemBuilder: (context, index) {
+                                final order = loaded.serviceOrders[index];
+                                return Slidable(
+                                  key: ValueKey(order.id),
+                                  endActionPane: ActionPane(
+                                    motion: const DrawerMotion(),
+                                    extentRatio: 0.42,
+                                    children: [
+                                      SlidableAction(
+                                        onPressed: (_) => _showEditServiceOrderForm(context, order),
+                                        backgroundColor: Colors.blue,
+                                        foregroundColor: Colors.white,
+                                        icon: Icons.edit,
+                                        label: 'Editar',
+                                      ),
+                                      SlidableAction(
+                                        onPressed: (_) async {
+                                          final confirmed = await showDialog<bool>(
+                                            context: context,
+                                            builder: (ctx) => AlertDialog(
+                                              title: const Text('Excluir ordem?'),
+                                              content: const Text('Esta ação não pode ser desfeita.'),
+                                              actions: [
+                                                TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+                                                TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Excluir')),
+                                              ],
+                                            ),
+                                          );
+                                          if (confirmed == true) {
+                                            await context.read<HomeController>().deleteServiceOrder(order.id!);
+                                          }
+                                        },
+                                        backgroundColor: Colors.red,
+                                        foregroundColor: Colors.white,
+                                        icon: Icons.delete,
+                                        label: 'Excluir',
+                                      ),
+                                    ],
+                                  ),
+                                  child: GestureDetector(
+                                    onTap: () => _showEditServiceOrderForm(context, order),
+                                    child: _ServiceOrderCard(serviceOrder: order),
+                                  ),
+                                );
+                              },
+                              itemCount: loaded.serviceOrders.length,
+                            ),
+                    ),
+                  ],
+                );
+              }
+              return const Center(child: Text('Estado inicial'));
+            },
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () => _showCreateServiceOrderForm(context),
+            child: const Icon(Icons.add),
+          ),
+        );
+      },
     );
   }
 }
+
 class _ServiceOrderCard extends StatelessWidget {
   final ServiceOrder serviceOrder;
 
@@ -187,6 +203,27 @@ class _ServiceOrderCard extends StatelessWidget {
               runSpacing: 4,
               alignment: WrapAlignment.start,
               children: [
+                Chip(
+                  label: Text(
+                    serviceOrder.active == 1 ? 'Ativa' : 'Inativa',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  backgroundColor: serviceOrder.active == 1
+                      ? cs.tertiaryContainer
+                      : cs.errorContainer.withOpacity(0.20),
+                  shape: StadiumBorder(
+                    side: BorderSide(
+                      color: serviceOrder.active == 1
+                          ? cs.tertiary
+                          : cs.error,
+                    ),
+                  ),
+                  labelStyle: TextStyle(
+                    color: serviceOrder.active == 1
+                        ? cs.onTertiaryContainer
+                        : cs.error,
+                  ),
+                ),
                 Chip(
                   label: Text(
                     serviceOrder.status,
@@ -292,12 +329,13 @@ class _CreateServiceOrderDialogState extends State<_CreateServiceOrderDialog> {
   late final GlobalKey<FormState> _formKey;
   late final TextEditingController _responsibleController;
   late final TextEditingController _taskController;
-  late final TextEditingController _statusController;
+  late final TextEditingController _descriptionController;
   late final TextEditingController _startDateController;
   late final TextEditingController _endDateController;
   late DateTime _startDate;
   late DateTime _endDate;
   late bool _active;
+  late String _status;
 
   @override
   void initState() {
@@ -305,19 +343,20 @@ class _CreateServiceOrderDialogState extends State<_CreateServiceOrderDialog> {
     _formKey = GlobalKey<FormState>();
     _responsibleController = TextEditingController();
     _taskController = TextEditingController();
-    _statusController = TextEditingController();
+    _descriptionController = TextEditingController();
     _startDate = DateTime.now();
     _endDate = DateTime.now().add(const Duration(days: 1));
     _startDateController = TextEditingController(text: _formatDate(_startDate));
     _endDateController = TextEditingController(text: _formatDate(_endDate));
     _active = true;
+    _status = 'em andamento';
   }
 
   @override
   void dispose() {
     _responsibleController.dispose();
     _taskController.dispose();
-    _statusController.dispose();
+    _descriptionController.dispose();
     _startDateController.dispose();
     _endDateController.dispose();
     super.dispose();
@@ -385,18 +424,17 @@ class _CreateServiceOrderDialogState extends State<_CreateServiceOrderDialog> {
                   },
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
+                DropdownButtonFormField<String>(
                   decoration: const InputDecoration(
-                    labelText: "Status",
+                    labelText: 'Status',
                     border: OutlineInputBorder(),
                   ),
-                  controller: _statusController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Preencha o campo";
-                    }
-                    return null;
-                  },
+                  value: _status,
+                  items: const [
+                    DropdownMenuItem(value: 'em andamento', child: Text('Em andamento')),
+                    DropdownMenuItem(value: 'finalizado', child: Text('Finalizado')),
+                  ],
+                  onChanged: (v) => setState(() => _status = v ?? 'em andamento'),
                 ),
                 const SizedBox(height: 16),
                 SwitchListTile.adaptive(
@@ -418,6 +456,15 @@ class _CreateServiceOrderDialogState extends State<_CreateServiceOrderDialog> {
                     }
                     return null;
                   },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  decoration: const InputDecoration(
+                    labelText: "Descrição",
+                    border: OutlineInputBorder(),
+                  ),
+                  controller: _descriptionController,
+                  maxLines: 3,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -466,7 +513,8 @@ class _CreateServiceOrderDialogState extends State<_CreateServiceOrderDialog> {
                         widget.onSave(ServiceOrder(
                           responsible: _responsibleController.text,
                           task: _taskController.text,
-                          status: _statusController.text,
+                          description: _descriptionController.text,
+                          status: _status,
                           active: _active ? 1 : 0,
                           excluded: 0,
                           startPrevison: _startDate,
@@ -513,12 +561,13 @@ class _EditServiceOrderDialogState extends State<_EditServiceOrderDialog> {
   late final GlobalKey<FormState> _formKey;
   late final TextEditingController _responsibleController;
   late final TextEditingController _taskController;
-  late final TextEditingController _statusController;
+  late final TextEditingController _descriptionController;
   late final TextEditingController _startDateController;
   late final TextEditingController _endDateController;
   late DateTime _startDate;
   late DateTime _endDate;
   late bool _active;
+  late String _status;
 
   @override
   void initState() {
@@ -530,9 +579,10 @@ class _EditServiceOrderDialogState extends State<_EditServiceOrderDialog> {
     _taskController = TextEditingController(
       text: widget.serviceOrder.task,
     );
-    _statusController = TextEditingController(
-      text: widget.serviceOrder.status,
+    _descriptionController = TextEditingController(
+      text: widget.serviceOrder.description,
     );
+    _status = widget.serviceOrder.status;
     _startDate = widget.serviceOrder.startPrevison;
     _endDate = widget.serviceOrder.endPrevison;
     _startDateController = TextEditingController(text: _formatDate(_startDate));
@@ -544,7 +594,7 @@ class _EditServiceOrderDialogState extends State<_EditServiceOrderDialog> {
   void dispose() {
     _responsibleController.dispose();
     _taskController.dispose();
-    _statusController.dispose();
+    _descriptionController.dispose();
     _startDateController.dispose();
     _endDateController.dispose();
     super.dispose();
@@ -612,18 +662,17 @@ class _EditServiceOrderDialogState extends State<_EditServiceOrderDialog> {
                   },
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
+                DropdownButtonFormField<String>(
                   decoration: const InputDecoration(
-                    labelText: "Status",
+                    labelText: 'Status',
                     border: OutlineInputBorder(),
                   ),
-                  controller: _statusController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Preencha o campo";
-                    }
-                    return null;
-                  },
+                  value: _status,
+                  items: const [
+                    DropdownMenuItem(value: 'em andamento', child: Text('Em andamento')),
+                    DropdownMenuItem(value: 'finalizado', child: Text('Finalizado')),
+                  ],
+                  onChanged: (v) => setState(() => _status = v ?? 'em andamento'),
                 ),
                 const SizedBox(height: 16),
                 SwitchListTile.adaptive(
@@ -645,6 +694,15 @@ class _EditServiceOrderDialogState extends State<_EditServiceOrderDialog> {
                     }
                     return null;
                   },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  decoration: const InputDecoration(
+                    labelText: "Descrição",
+                    border: OutlineInputBorder(),
+                  ),
+                  controller: _descriptionController,
+                  maxLines: 3,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -693,7 +751,8 @@ class _EditServiceOrderDialogState extends State<_EditServiceOrderDialog> {
                         widget.onSave(ServiceOrder(
                           responsible: _responsibleController.text,
                           task: _taskController.text,
-                          status: _statusController.text,
+                          description: _descriptionController.text,
+                          status: _status,
                           active: _active ? 1 : 0,
                           excluded: 0,
                           startPrevison: _startDate,

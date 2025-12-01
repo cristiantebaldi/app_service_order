@@ -17,6 +17,7 @@ class ChangeServiceOrderRepositoryImpl implements ChangeServiceOrderRepository {
         await txn.update('service_order', {
           'responsible': serviceOrder.responsible,
           'task': serviceOrder.task,
+          'description': serviceOrder.description,
           'status': serviceOrder.status,
           'active': serviceOrder.active,
           'excluded': serviceOrder.excluded,
