@@ -51,11 +51,11 @@ class HomeController extends Cubit<HomeState> {
         return list.where((e) => (e.active) == 1).toList();
       case StatusFilter.emAndamento:
         return list
-            .where((e) => (e.status).toLowerCase().contains('andamento'))
+            .where((e) => (e.status).toLowerCase().contains('em andamento'))
             .toList();
       case StatusFilter.finalizados:
         return list
-            .where((e) => (e.status).toLowerCase().contains('finaliz'))
+            .where((e) => (e.status).toLowerCase().contains('finalizado'))
             .toList();
     }
   }
