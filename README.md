@@ -88,7 +88,7 @@ class ServiceExecutionSuccess extends ServiceExecutionState {}
 
 1. **Clone o repositório**
    ```bash
-   git clone <seu-repositorio>
+   git clone https://github.com/cristiantebaldi/app_service_order.git
    cd app_service_order
    ```
 
