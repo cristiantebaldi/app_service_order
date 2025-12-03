@@ -42,10 +42,13 @@ class HomeController extends Cubit<HomeState> {
     emit(HomeLoaded(_applyFilter(_all, _currentFilter), _currentFilter));
   }
 
-  List<ServiceOrder> _applyFilter(List<ServiceOrder> list, StatusFilter filter) {
+  List<ServiceOrder> _applyFilter(
+    List<ServiceOrder> list,
+    StatusFilter filter,
+  ) {
     switch (filter) {
       case StatusFilter.ativos:
-        return list.where((e) => (e.active ?? 1) == 1).toList();
+        return list.where((e) => (e.active) == 1).toList();
       case StatusFilter.emAndamento:
         return list
             .where((e) => (e.status).toLowerCase().contains('andamento'))
@@ -55,32 +58,6 @@ class HomeController extends Cubit<HomeState> {
             .where((e) => (e.status).toLowerCase().contains('finaliz'))
             .toList();
     }
-  }
-
-  String formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
-  }
-
-  void updateStartDate(DateTime newDate, DateTime currentEndDate,
-      Function(DateTime, DateTime) onUpdate) {
-    DateTime endDate = currentEndDate;
-
-    if (newDate.isAfter(endDate)) {
-      endDate = newDate.add(const Duration(days: 1));
-    }
-
-    onUpdate(newDate, endDate);
-  }
-
-  void updateEndDate(DateTime newDate, DateTime currentStartDate,
-      Function(DateTime, DateTime) onUpdate) {
-    DateTime startDate = currentStartDate;
-
-    if (newDate.isBefore(startDate)) {
-      startDate = newDate.subtract(const Duration(days: 1));
-    }
-
-    onUpdate(startDate, newDate);
   }
 
   Future<void> saveServiceOrder(ServiceOrder serviceOrder) async {

@@ -1,4 +1,4 @@
-import 'package:app_service_order/database/db.dart';
+import 'package:app_service_order/core/data/database/db.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sqflite/sqflite.dart';
 
